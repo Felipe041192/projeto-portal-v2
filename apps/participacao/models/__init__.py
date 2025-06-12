@@ -1,5 +1,5 @@
 # apps/participacao/models/__init__.py
-from .funcionario import Setor, Funcionario, LoginAttempt, UserActionLog, Participacao, AprovacaoSetor, Evento
+from apps.participacao.models import Setor, Funcionario, LoginAttempt, UserActionLog, Participacao, AprovacaoSetor, Evento
 from .regra_participacao import RegraParticipacao, ValoresParticipacao
 
 __all__ = [

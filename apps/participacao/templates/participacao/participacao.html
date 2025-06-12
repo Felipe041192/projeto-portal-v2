@@ -1,4 +1,4 @@
-{% load static filters %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -53,7 +53,7 @@
                         {% elif message.tags == 'error' %}
                             <div class="message error">{{ message }}</div>
                         {% elif message.tags == 'warning' %}
-                            <div class="message warning">{{ message }}</div>
+                            <div class="message warning">{{ message|safe }}</div> <!-- Exibe mensagem bruta -->
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -65,7 +65,7 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="funcionario_filtro">Funcionário:</label>
-                        <input type="text" name="funcionario" id="funcionario_filtro" value="{{ funcionario_filtro }}">
+                        <input type="text" name="funcionario" id="funcionario_filtro" value="{{ funcionario_filtro|default:'' }}">
                     </div>
                     <div class="form-group">
                         <label for="setor_filtro">Setor:</label>
@@ -90,24 +90,24 @@
 
                 <div class="action-buttons">
                     <a href="{% url 'Participacao:importar_planilha_participacao' %}" class="action-btn">Importar Planilha</a>
-                    <a href="{% url 'Participacao:recalcular_participacao' %}?trimestre={{ trimestre_filtro }}" class="action-btn">Recalcular Participação</a>
+                    <a href="{% url 'Participacao:recalcular_participacao' %}?trimestre={{ trimestre_filtro|default:'' }}" class="action-btn">Recalcular Participação</a>
                     <form method="get" action="{% url 'Participacao:gerar_relatorio_pdf' %}" style="display: inline;">
-                        <input type="hidden" name="trimestre" value="{{ trimestre_filtro }}">
+                        <input type="hidden" name="trimestre" value="{{ trimestre_filtro|default:'' }}">
                         <button type="submit" class="action-btn">Gerar Relatório PDF</button>
                     </form>
                     <form method="get" action="{% url 'Participacao:gerar_relatorio_excel' %}" style="display: inline;">
-                        <input type="hidden" name="trimestre" value="{{ trimestre_filtro }}">
+                        <input type="hidden" name="trimestre" value="{{ trimestre_filtro|default:'' }}">
                         <button type="submit" class="action-btn">Gerar Relatório Excel</button>
                     </form>
                 </div>
             </div>
 
             <!-- Resultados -->
-            <h2>Resultados {% if not trimestre_filtro %}(Trimestre Atual: {{ ultimo_trimestre }}){% else %}(Trimestre: {{ trimestre_filtro }}){% endif %}</h2>
+            <h2>Resultados {% if not trimestre_filtro %}(Trimestre Atual: {{ ultimo_trimestre|default:'N/A' }}){% else %}(Trimestre: {{ trimestre_filtro }}){% endif %}</h2>
             {% if page_obj %}
                 <div class="totals">
-                    <p>Total Bruto: {{ total_bruto|format_currency }}</p>
-                    <p>Total Líquido: {{ total_liquido|format_currency }}</p>
+                    <p>Total Bruto: {{ total_bruto|default:0 }}</p>
+                    <p>Total Líquido: {{ total_liquido|default:0 }}</p>
                 </div>
 
                 <table class="details-table">
@@ -127,11 +127,11 @@
                         {% for p in page_obj %}
                             {% if p.valor_bruto > 0 %}
                             <tr>
-                                <td>{{ p.funcionario.nome }}</td>
-                                <td>{{ p.funcionario.setor.nome|default:"Não informado" }}</td>
-                                <td>{{ p.valor_bruto|format_currency }}</td>
-                                <td>{{ p.final_participacao|format_currency }}</td>
-                                <td>{{ p.trimestre }}</td>
+                                <td>{{ p.funcionario.nome|default:'N/A' }}</td>
+                                <td>{{ p.funcionario.setor.nome|default:'Não informado' }}</td>
+                                <td>{{ p.valor_bruto|default:0 }}</td>
+                                <td>{{ p.final_participacao|default:0 }}</td>
+                                <td>{{ p.trimestre|default:'N/A' }}</td>
                                 <td>
                                     {% if p.funcionario %}
                                         <form method="post" action="{% url 'Participacao:alternar_abono' %}" class="abono-form">
@@ -139,7 +139,7 @@
                                             <input type="hidden" name="funcionario_id" value="{{ p.funcionario.id }}">
                                             <input type="hidden" name="trimestre" value="{{ p.trimestre }}">
                                             {% if p.funcionario.abono_ativo %}
-                                                <button type="submit" name="action" value="toggle" class="action-btn">Desativar Abono ({{ p.funcionario.abono_valor }})</button>
+                                                <button type="submit" name="action" value="toggle" class="action-btn">Desativar Abono ({{ p.funcionario.abono_valor|default:0 }})</button>
                                             {% else %}
                                                 <select name="abono_type">
                                                     <option value="fixed">Fixo</option>
@@ -154,10 +154,10 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <button class="action-btn" onclick="openEventModal('{{ p.funcionario.id }}', '{{ p.trimestre }}')">Inserir Eventos</button>
+                                    <button class="action-btn" onclick="openEventModal('{{ p.funcionario.id|default:0 }}', '{{ p.trimestre|default:'' }}')">Inserir Eventos</button>
                                 </td>
                                 <td>
-                                    <a href="{% url 'Participacao:extrato' p.funcionario.nome %}?trimestre={{ p.trimestre }}" class="action-btn">Ver Extrato</a>
+                                    <a href="{% url 'Participacao:extrato' p.funcionario.nome|default:'N/A' %}?trimestre={{ p.trimestre|default:'' }}" class="action-btn">Ver Extrato</a>
                                 </td>
                             </tr>
                             {% endif %}
@@ -186,7 +186,7 @@
                     {% endif %}
                 </div>
             {% else %}
-                <p class="no-results">Nenhuma participação encontrada para o trimestre {% if trimestre_filtro %}{{ trimestre_filtro }}{% else %}{{ ultimo_trimestre }}{% endif %}. Tente selecionar outro trimestre, como 2024-Q4, ou importe uma planilha.</p>
+                <p class="no-results">Nenhuma participação encontrada para o trimestre {% if trimestre_filtro %}{{ trimestre_filtro }}{% else %}{{ ultimo_trimestre|default:'N/A' }}{% endif %}. Tente selecionar outro trimestre, como 2024-Q4, ou importe uma planilha.</p>
             {% endif %}
         </div>
     </div>
@@ -211,14 +211,14 @@
                             <tbody>
                                 {% for funcionario in funcionarios_com_dados_incompletos %}
                                 <tr>
-                                    <td>{{ funcionario.nome }}</td>
+                                    <td>{{ funcionario.nome|default:'N/A' }}</td>
                                     <td>
                                         {% if not funcionario.data_admissao %}Data de Admissão, {% endif %}
                                         {% if not funcionario.usuario %}Login, {% endif %}
                                         {% if funcionario.usuario and not funcionario.usuario.has_usable_password %}Senha{% endif %}
                                     </td>
                                     <td>
-                                        <a href="{% url 'Participacao:editar_funcionario' funcionario.id %}" class="action-btn">Editar</a>
+                                        <a href="{% url 'Participacao:editar_funcionario' funcionario.id|default:0 %}" class="action-btn">Editar</a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -228,8 +228,7 @@
                 {% endif %}
                 {% if tentativas_maliciosas_count > 0 %}
                     <div class="notification-item">
-                        <p>Há {{ tentativas_maliciosas_count }} tentativa(s) maliciosa(s) de login em contas de gestor ou master admin.</p>
-                        <a href="{% url 'Participacao:logs' %}" class="action-btn">Ver Logs</a>
+                        <p>Há {{ tentativas_maliciosas_count|default:0 }} tentativa(s) maliciosa(s) de login em contas de gestor ou master admin.</p>
                     </div>
                 {% endif %}
             {% else %}
@@ -245,37 +244,7 @@
             <h2>Aviso de Configuração</h2>
             {% for message in messages %}
                 {% if message.tags == 'warning' and message != "Valores brutos calculados estão muito altos! Verifique os valores inseridos para documentos normais e diferenciados." %}
-                    {% with data=message|safe|json_parse %}
-                        {% if data.tipo == 'proporcional_fora_trimestre' %}
-                            <p>Os seguintes funcionários estão com tipo 'proporcional', mas o trimestre recalculado ({{ data.trimestre }}) é posterior ao trimestre de admissão:</p>
-                            <table class="details-table">
-                                <tbody>
-                                    {% for func in data.funcionarios %}
-                                    <tr>
-                                        <td>{{ func.nome }} (admitido em {{ func.data_admissao }})</td>
-                                        <td>
-                                            <a href="{% url 'Participacao:editar_funcionario' func.id %}" class="action-btn">Editar</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% elif data.tipo == 'normal_no_trimestre' %}
-                            <p>Os seguintes funcionários estão com tipo 'normal', mas o trimestre recalculado ({{ data.trimestre }}) é o mesmo do trimestre de admissão:</p>
-                            <table class="details-table">
-                                <tbody>
-                                    {% for func in data.funcionarios %}
-                                    <tr>
-                                        <td>{{ func.nome }} (admitido em {{ func.data_admissao }})</td>
-                                        <td>
-                                            <a href="{% url 'Participacao:editar_funcionario' func.id %}" class="action-btn">Editar</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    {% endwith %}
+                    <p>{{ message|safe }}</p> <!-- Exibe mensagem bruta sem parse JSON -->
                 {% elif message.tags == 'warning' %}
                     <p>{{ message }}</p>
                 {% endif %}
@@ -358,20 +327,23 @@
 
             // Event Modal
             function openEventModal(funcionarioId, trimestre) {
-                document.getElementById('eventFuncionarioId').value = funcionarioId;
-                document.getElementById('eventTrimestre').value = trimestre;
+                document.getElementById('eventFuncionarioId').value = funcionarioId || 0;
+                document.getElementById('eventTrimestre').value = trimestre || '';
                 eventModal.style.display = 'block';
-                fetch(`/participacao/listar_eventos/${funcionarioId}/`)
+                fetch(`/participacao/listar_eventos/${funcionarioId || 0}/`)
                     .then(response => response.json())
                     .then(data => {
                         const eventList = document.getElementById('eventList');
                         eventList.innerHTML = '';
-                        data.eventos.forEach(event => {
-                            const li = document.createElement('li');
-                            li.innerHTML = `${event.tipo} - ${event.data} <input type="checkbox" name="excluir_eventos[]" value="${event.id}"> Excluir`;
-                            eventList.appendChild(li);
-                        });
-                    });
+                        if (data.eventos) {
+                            data.eventos.forEach(event => {
+                                const li = document.createElement('li');
+                                li.innerHTML = `${event.tipo} - ${event.data} <input type="checkbox" name="excluir_eventos[]" value="${event.id || 0}"> Excluir`;
+                                eventList.appendChild(li);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Erro ao carregar eventos:', error));
             }
 
             // Adicionar novo evento

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'apps.participacao.apps.ParticipacaoConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -74,7 +75,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'portal_sana',
-        'USER': 'postgres',
+        'USER': 'admin',
         'PASSWORD': 'admin123',
         'HOST': 'localhost',
         'PORT': '5432',

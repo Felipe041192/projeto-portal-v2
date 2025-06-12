@@ -21,6 +21,7 @@ class Funcionario(models.Model):
     usuario = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, verbose_name="Usuário")
     nome = models.CharField(max_length=100, verbose_name="Nome")
     setor = models.ForeignKey(Setor, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Setor")
+    setor = models.ForeignKey(Setor, on_delete=models.CASCADE, null=True, blank=True, related_name='funcionarios')
     data_admissao = models.DateField(null=True, blank=True, verbose_name="Data de Admissão")
     data_demissao = models.DateField(null=True, blank=True, verbose_name="Data de Demissão")
     tipo_acesso = models.CharField(max_length=20, choices=[('gestor', 'Gestor'), ('master_admin', 'Master Admin')], default='gestor', verbose_name="Tipo de Acesso")

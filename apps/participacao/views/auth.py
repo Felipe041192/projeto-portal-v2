@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.contrib.auth.models import User
 import logging
 import os
 from django.core.exceptions import ObjectDoesNotExist
