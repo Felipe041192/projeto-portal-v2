@@ -1,0 +1,506 @@
+{% load static filters %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Cálculo da Participação</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Topbar -->
+    <div class="topbar">
+        <h1>Detalhes do Cálculo da Participação</h1>
+        <div class="button-group">
+            <a href="{% url 'Participacao:participacao' %}" class="back-btn">Voltar</a>
+            <form method="post" action="{% url 'Participacao:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Sair</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="container">
+        <div class="sidebar">
+            {% if user.is_authenticated %}
+                {% if user.is_superuser or user.funcionario.tipo_acesso == 'gestor' %}
+                    <a href="{% url 'Participacao:participacao' %}">Painel do Administrador</a>
+                    <div class="submenu">
+                        <a href="{% url 'Participacao:participacao' %}" {% if request.resolver_match.url_name == 'participacao' %}class="active"{% endif %}>Participação</a>
+                        <a href="{% url 'Participacao:configurar_participacao_setor' %}" {% if request.resolver_match.url_name == 'configurar_participacao_setor' %}class="active"{% endif %}>Configurar Base por Setor</a>
+                        <a href="{% url 'Participacao:recalcular_participacao' %}" {% if request.resolver_match.url_name == 'recalcular_participacao' %}class="active"{% endif %}>Calcular Participação</a>
+                        {% if user.is_superuser or user.funcionario.pode_configurar_regras %}
+                            <a href="{% url 'Participacao:configurar_regras_participacao' %}" {% if request.resolver_match.url_name == 'configurar_regras_participacao' %}class="active"{% endif %}>Configurar Regras de Participação</a>
+                        {% endif %}
+                    </div>
+                    <a href="#">Funcionários/Setores</a>
+                    <div class="submenu">
+                        <a href="{% url 'Participacao:cadastrar_setor' %}" {% if request.resolver_match.url_name == 'cadastrar_setor' %}class="active"{% endif %}>Cadastrar Setor</a>
+                        <a href="{% url 'Participacao:cadastrar_funcionario' %}" {% if request.resolver_match.url_name == 'cadastrar_funcionario' %}class="active"{% endif %}>Cadastrar Funcionário</a>
+                        <a href="{% url 'Participacao:funcionarios' %}" {% if request.resolver_match.url_name == 'funcionarios' %}class="active"{% endif %}>Configurar Funcionários</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="details-container">
+            {% if messages %}
+                <div class="message-container">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="message success">{{ message }}</div>
+                        {% elif message.tags == 'error' %}
+                            <div class="message error">{{ message }}</div>
+                        {% elif message.tags == 'warning' %}
+                            <div class="message warning">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <h2>Detalhes do Cálculo da Participação</h2>
+            <form method="get" action="{% url 'Participacao:detalhes_calculo_participacao' %}" class="form-container">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="trimestre">Selecione o Trimestre:</label>
+                    <select name="trimestre" id="trimestre" onchange="this.form.submit()">
+                        <option value="">Escolha um trimestre</option>
+                        {% for trimestre in trimestres %}
+                        <option value="{{ trimestre }}" {% if trimestre == selected_trimestre %}selected{% endif %}>{{ trimestre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            {% if selected_trimestre %}
+                <div class="section">
+                    <h3>Valores Iniciais</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Documentos Normais:</span>
+                            <span class="value">R$ {{ total_normal|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Documentos Diferenciados:</span>
+                            <span class="value">R$ {{ total_diferenciada|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Normal ({{ percentual_normal }}%):</span>
+                            <span class="value">R$ {{ valor_normal|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Diferenciado ({{ percentual_diferenciada }}%):</span>
+                            <span class="value">R$ {{ valor_diferenciada|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item highlight">
+                            <span class="label">Valor Total Bruto:</span>
+                            <span class="value">R$ {{ total_bruto|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Distribuição</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Funcionários Aptos:</span>
+                            <span class="value">{{ funcionarios_aptos_count }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Funcionários no Faturamento:</span>
+                            <span class="value">{{ num_funcionarios_faturamento }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Funcionários nos Demais Setores:</span>
+                            <span class="value">{{ num_funcionarios_demais }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Normal por Funcionário:</span>
+                            <span class="value">R$ {{ valor_x|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Diferenciado (Faturamento, {{ percentual_faturamento }}%):</span>
+                            <span class="value">R$ {{ valor_por_funcionario_faturamento|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Diferenciado (Demais, {{ percentual_demais }}%):</span>
+                            <span class="value">R$ {{ valor_por_funcionario_demais|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Bruto Base (Faturamento):</span>
+                            <span class="value">R$ {{ valor_bruto_faturamento|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Valor Bruto Base (Demais Setores):</span>
+                            <span class="value">R$ {{ valor_bruto_demais|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Totais Calculados</h3>
+                    <div class="info-grid">
+                        <div class="info-item highlight">
+                            <span class="label">Total Bruto Calculado:</span>
+                            <span class="value">R$ {{ total_bruto_calculado|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-item highlight">
+                            <span class="label">Total Final (após penalidades):</span>
+                            <span class="value">R$ {{ total_final_calculado|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Detalhes por Funcionário</h3>
+                    <table class="details-table">
+                        <thead>
+                            <tr>
+                                <th>Funcionário</th>
+                                <th>Setor</th>
+                                <th>Tipo de Participação</th>
+                                <th>Percentual de Participação</th>
+                                <th>Dias Trabalhados</th>
+                                <th>Valor Bruto (R$)</th>
+                                <th>Valor Final (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detalhe in detalhes %}
+                            <tr>
+                                <td>{{ detalhe.funcionario.nome }}</td>
+                                <td>{{ detalhe.setor }}</td>
+                                <td>{{ detalhe.tipo_participacao|title }}</td>
+                                <td>{{ detalhe.percentual_participacao|floatformat:2 }}%</td>
+                                <td>{{ detalhe.dias_trabalhados }}</td>
+                                <td>{{ detalhe.valor_bruto|floatformat:2 }}</td>
+                                <td>{{ detalhe.valor_final|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7">Nenhum funcionário apto encontrado para este trimestre.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section" style="text-align: center;">
+                    <form method="get" action="{% url 'Participacao:gerar_relatorio_pdf' %}" style="display: inline;">
+                        <input type="hidden" name="trimestre" value="{{ selected_trimestre }}">
+                        <button type="submit" class="action-btn">Gerar Relatório PDF</button>
+                    </form>
+                    <form method="get" action="{% url 'Participacao:gerar_relatorio_excel' %}" style="display: inline;">
+                        <input type="hidden" name="trimestre" value="{{ selected_trimestre }}">
+                        <button type="submit" class="action-btn">Gerar Relatório Excel</button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- Modal de Notificações -->
+            <div id="notificationModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn">×</span>
+                    <h2>Notificações</h2>
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if message.tags == 'warning' %}
+                                <div class="notification-item">
+                                    {{ message }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p>Nenhuma notificação no momento.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationModal = document.getElementById('notificationModal');
+            const closeBtn = document.querySelector('.close-btn');
+
+            // Abrir modal ao carregar (se houver mensagens de aviso)
+            if (document.querySelector('.message.warning')) {
+                notificationModal.style.display = 'block';
+            }
+
+            // Fechar o modal ao clicar no botão "Fechar"
+            closeBtn.addEventListener('click', function() {
+                notificationModal.style.display = 'none';
+            });
+
+            // Fechar o modal ao clicar fora do contêiner
+            window.addEventListener('click', function(event) {
+                if (event.target == notificationModal) {
+                    notificationModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Reutilizando estilos de participacao.html */
+        .topbar {
+            background-color: #D1D2D4;
+            color: #FFFFFF;
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .topbar h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            color: #3D4145;
+            flex-grow: 1;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        .logout-btn, .back-btn, .action-btn {
+            background-color: transparent;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .logout-btn {
+            color: #3D4145;
+            border: 1px solid #3D4145;
+        }
+        .logout-btn:hover {
+            background-color: #DD4243;
+            border-color: #DD4243;
+            color: #FFFFFF;
+        }
+        .back-btn {
+            color: #FF5555;
+            border: 1px solid #FF5555;
+        }
+        .back-btn:hover {
+            background-color: #CC4444;
+            border-color: #CC4444;
+            color: #FFFFFF;
+        }
+        .action-btn {
+            background-color: #DD4243;
+            color: #FFFFFF;
+            border: none;
+        }
+        .action-btn:hover {
+            background-color: #B83637;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            margin-top: 60px;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #D1D2D4;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            color: #3D4145;
+            text-decoration: none;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #DD4243;
+            color: #FFFFFF;
+        }
+        .sidebar .submenu {
+            margin-left: 15px;
+        }
+        .sidebar .submenu a.active {
+            background-color: #DD4243;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .details-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-left: 270px;
+        }
+        .message-container {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 500px;
+            margin: 20px 0;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .info-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .info-item .label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+        }
+        .info-item .value {
+            display: block;
+            font-size: 16px;
+            color: #333;
+        }
+        .info-item.highlight {
+            background-color: #e6f7fa;
+            border: 1px solid #b3e5fc;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-size: 14px;
+        }
+        .details-table th, .details-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #DD4243;
+            color: white;
+            font-weight: bold;
+        }
+        .details-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .details-table tr:hover {
+            background-color: #E6E7E8;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .close-btn {
+            color: #3D4145;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: #DD4243;
+        }
+        .notification-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                top: 0;
+            }
+            .details-container {
+                margin-left: 0;
+                padding: 10px;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

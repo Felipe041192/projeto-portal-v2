@@ -1,0 +1,690 @@
+{% load static filters %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Participação</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Topbar -->
+    <div class="topbar">
+        <h1>Participação</h1>
+        <div class="button-group">
+            <a href="{% url 'Participacao:index' %}" class="back-btn">Voltar</a>
+            <form method="post" action="{% url 'Participacao:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Sair</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="container">
+        <div class="sidebar">
+            {% if user.is_authenticated %}
+                {% if user.is_superuser or user.funcionario.tipo_acesso == 'gestor' %}
+                    <a href="{% url 'Participacao:participacao' %}">Painel do Administrador</a>
+                    <div class="submenu">
+                        <a href="{% url 'Participacao:participacao' %}" {% if request.resolver_match.url_name == 'participacao' %}class="active"{% endif %}>Participação</a>
+                        <a href="{% url 'Participacao:configurar_participacao_setor' %}" {% if request.resolver_match.url_name == 'configurar_participacao_setor' %}class="active"{% endif %}>Configurar Base por Setor</a>
+                        <a href="{% url 'Participacao:recalcular_participacao' %}" {% if request.resolver_match.url_name == 'recalcular_participacao' %}class="active"{% endif %}>Calcular Participação</a>
+                        {% if user.is_superuser or user.funcionario.pode_configurar_regras %}
+                            <a href="{% url 'Participacao:configurar_regras_participacao' %}" {% if request.resolver_match.url_name == 'configurar_regras_participacao' %}class="active"{% endif %}>Configurar Regras de Participação</a>
+                        {% endif %}
+                    </div>
+                    <a href="#">Funcionários/Setores</a>
+                    <div class="submenu">
+                        <a href="{% url 'Participacao:cadastrar_setor' %}" {% if request.resolver_match.url_name == 'cadastrar_setor' %}class="active"{% endif %}>Cadastrar Setor</a>
+                        <a href="{% url 'Participacao:cadastrar_funcionario' %}" {% if request.resolver_match.url_name == 'cadastrar_funcionario' %}class="active"{% endif %}>Cadastrar Funcionário</a>
+                        <a href="{% url 'Participacao:funcionarios' %}" {% if request.resolver_match.url_name == 'funcionarios' %}class="active"{% endif %}>Configurar Funcionários</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="details-container">
+            {% if messages %}
+                <div class="message-container">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="message success">{{ message }}</div>
+                        {% elif message.tags == 'error' %}
+                            <div class="message error">{{ message }}</div>
+                        {% elif message.tags == 'warning' %}
+                            <div class="message warning">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Filtros e Ações -->
+            <div class="filter-section">
+                <form method="get" action="{% url 'Participacao:participacao' %}" class="filter-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="funcionario_filtro">Funcionário:</label>
+                        <input type="text" name="funcionario" id="funcionario_filtro" value="{{ funcionario_filtro }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="setor_filtro">Setor:</label>
+                        <select name="setor" id="setor_filtro">
+                            <option value="">Todos os Setores</option>
+                            {% for setor in setores %}
+                            <option value="{{ setor }}" {% if setor_filtro == setor %}selected{% endif %}>{{ setor }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="trimestre_filtro">Trimestre:</label>
+                        <select name="trimestre" id="trimestre_filtro" onchange="this.form.submit()">
+                            <option value="">Selecione um Trimestre</option>
+                            {% for trimestre in trimestres %}
+                            <option value="{{ trimestre }}" {% if trimestre_filtro == trimestre %}selected{% endif %}>{{ trimestre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="action-btn">Buscar</button>
+                </form>
+
+                <div class="action-buttons">
+                    <a href="{% url 'Participacao:importar_planilha_participacao' %}" class="action-btn">Importar Planilha</a>
+                    <a href="{% url 'Participacao:recalcular_participacao' %}?trimestre={{ trimestre_filtro }}" class="action-btn">Recalcular Participação</a>
+                    <form method="get" action="{% url 'Participacao:gerar_relatorio_pdf' %}" style="display: inline;">
+                        <input type="hidden" name="trimestre" value="{{ trimestre_filtro }}">
+                        <button type="submit" class="action-btn">Gerar Relatório PDF</button>
+                    </form>
+                    <form method="get" action="{% url 'Participacao:gerar_relatorio_excel' %}" style="display: inline;">
+                        <input type="hidden" name="trimestre" value="{{ trimestre_filtro }}">
+                        <button type="submit" class="action-btn">Gerar Relatório Excel</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Resultados -->
+            <h2>Resultados {% if not trimestre_filtro %}(Trimestre Atual: {{ ultimo_trimestre }}){% else %}(Trimestre: {{ trimestre_filtro }}){% endif %}</h2>
+            {% if page_obj %}
+                <div class="totals">
+                    <p>Total Bruto: {{ total_bruto|format_currency }}</p>
+                    <p>Total Líquido: {{ total_liquido|format_currency }}</p>
+                </div>
+
+                <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Setor</th>
+                            <th>Valor Bruto (R$)</th>
+                            <th>Valor Líquido (R$)</th>
+                            <th>Trimestre</th>
+                            <th>Abono</th>
+                            <th>Eventos</th>
+                            <th>Extrato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in page_obj %}
+                            {% if p.valor_bruto > 0 %}
+                            <tr>
+                                <td>{{ p.funcionario.nome }}</td>
+                                <td>{{ p.funcionario.setor.nome|default:"Não informado" }}</td>
+                                <td>{{ p.valor_bruto|format_currency }}</td>
+                                <td>{{ p.final_participacao|format_currency }}</td>
+                                <td>{{ p.trimestre }}</td>
+                                <td>
+                                    {% if p.funcionario %}
+                                        <form method="post" action="{% url 'Participacao:alternar_abono' %}" class="abono-form">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="funcionario_id" value="{{ p.funcionario.id }}">
+                                            <input type="hidden" name="trimestre" value="{{ p.trimestre }}">
+                                            {% if p.funcionario.abono_ativo %}
+                                                <button type="submit" name="action" value="toggle" class="action-btn">Desativar Abono ({{ p.funcionario.abono_valor }})</button>
+                                            {% else %}
+                                                <select name="abono_type">
+                                                    <option value="fixed">Fixo</option>
+                                                    <option value="percentage">Percentual</option>
+                                                </select>
+                                                <input type="number" name="abono_value" step="0.01" min="0" required placeholder="Valor">
+                                                <button type="submit" name="action" value="toggle" class="action-btn">Ativar Abono</button>
+                                            {% endif %}
+                                        </form>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="action-btn" onclick="openEventModal('{{ p.funcionario.id }}', '{{ p.trimestre }}')">Inserir Eventos</button>
+                                </td>
+                                <td>
+                                    <a href="{% url 'Participacao:extrato' p.funcionario.nome %}?trimestre={{ p.trimestre }}" class="action-btn">Ver Extrato</a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Paginação -->
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if funcionario_filtro %}&funcionario={{ funcionario_filtro }}{% endif %}{% if setor_filtro %}&setor={{ setor_filtro }}{% endif %}{% if trimestre_filtro %}&trimestre={{ trimestre_filtro }}{% endif %}" class="action-btn">Página Anterior</a>
+                    {% else %}
+                        <span class="action-btn disabled">Página Anterior</span>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <span class="action-btn active">{{ num }}</span>
+                        {% else %}
+                            <a href="?page={{ num }}{% if funcionario_filtro %}&funcionario={{ funcionario_filtro }}{% endif %}{% if setor_filtro %}&setor={{ setor_filtro }}{% endif %}{% if trimestre_filtro %}&trimestre={{ trimestre_filtro }}{% endif %}" class="action-btn">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if funcionario_filtro %}&funcionario={{ funcionario_filtro }}{% endif %}{% if setor_filtro %}&setor={{ setor_filtro }}{% endif %}{% if trimestre_filtro %}&trimestre={{ trimestre_filtro }}{% endif %}" class="action-btn">Próxima Página</a>
+                    {% else %}
+                        <span class="action-btn disabled">Próxima Página</span>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="no-results">Nenhuma participação encontrada para o trimestre {% if trimestre_filtro %}{{ trimestre_filtro }}{% else %}{{ ultimo_trimestre }}{% endif %}. Tente selecionar outro trimestre, como 2024-Q4, ou importe uma planilha.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de Notificações -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">×</span>
+            <h2>Notificações</h2>
+            {% if funcionarios_incompletos > 0 or tentativas_maliciosas_count > 0 %}
+                {% if funcionarios_incompletos > 0 %}
+                    <div class="notification-item">
+                        <h3>Funcionários com Dados Incompletos</h3>
+                        <table class="details-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Dados Faltantes</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for funcionario in funcionarios_com_dados_incompletos %}
+                                <tr>
+                                    <td>{{ funcionario.nome }}</td>
+                                    <td>
+                                        {% if not funcionario.data_admissao %}Data de Admissão, {% endif %}
+                                        {% if not funcionario.usuario %}Login, {% endif %}
+                                        {% if funcionario.usuario and not funcionario.usuario.has_usable_password %}Senha{% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'Participacao:editar_funcionario' funcionario.id %}" class="action-btn">Editar</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+                {% if tentativas_maliciosas_count > 0 %}
+                    <div class="notification-item">
+                        <p>Há {{ tentativas_maliciosas_count }} tentativa(s) maliciosa(s) de login em contas de gestor ou master admin.</p>
+                        <a href="{% url 'Participacao:logs' %}" class="action-btn">Ver Logs</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <p>Nenhuma notificação no momento.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de Aviso de Configuração -->
+    <div id="configWarningModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">×</span>
+            <h2>Aviso de Configuração</h2>
+            {% for message in messages %}
+                {% if message.tags == 'warning' and message != "Valores brutos calculados estão muito altos! Verifique os valores inseridos para documentos normais e diferenciados." %}
+                    {% with data=message|safe|json_parse %}
+                        {% if data.tipo == 'proporcional_fora_trimestre' %}
+                            <p>Os seguintes funcionários estão com tipo 'proporcional', mas o trimestre recalculado ({{ data.trimestre }}) é posterior ao trimestre de admissão:</p>
+                            <table class="details-table">
+                                <tbody>
+                                    {% for func in data.funcionarios %}
+                                    <tr>
+                                        <td>{{ func.nome }} (admitido em {{ func.data_admissao }})</td>
+                                        <td>
+                                            <a href="{% url 'Participacao:editar_funcionario' func.id %}" class="action-btn">Editar</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% elif data.tipo == 'normal_no_trimestre' %}
+                            <p>Os seguintes funcionários estão com tipo 'normal', mas o trimestre recalculado ({{ data.trimestre }}) é o mesmo do trimestre de admissão:</p>
+                            <table class="details-table">
+                                <tbody>
+                                    {% for func in data.funcionarios %}
+                                    <tr>
+                                        <td>{{ func.nome }} (admitido em {{ func.data_admissao }})</td>
+                                        <td>
+                                            <a href="{% url 'Participacao:editar_funcionario' func.id %}" class="action-btn">Editar</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    {% endwith %}
+                {% elif message.tags == 'warning' %}
+                    <p>{{ message }}</p>
+                {% endif %}
+            {% endfor %}
+            <a href="{% url 'Participacao:configurar_participacao_setor' %}" class="action-btn">Corrigir Configurações</a>
+        </div>
+    </div>
+
+    <!-- Modal de Inserção/Exclusão de Eventos -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">×</span>
+            <h2>Inserir/Excluir Eventos</h2>
+            <form method="post" action="{% url 'Participacao:inserir_eventos' %}" id="eventForm">
+                {% csrf_token %}
+                <input type="hidden" name="funcionario_id" id="eventFuncionarioId">
+                <input type="hidden" name="trimestre_filtro" id="eventTrimestre">
+                <div class="form-group">
+                    <label for="eventType">Tipo de Evento:</label>
+                    <select name="eventos[0][tipo]" id="eventType">
+                        <option value="atraso">Atraso</option>
+                        <option value="saida_antecipada">Saída Antecipada</option>
+                        <option value="atestado">Atestado</option>
+                        <option value="falta_justificada">Falta Justificada</option>
+                        <option value="falta_nao_justificada">Falta Não Justificada</option>
+                        <option value="falta_meio_turno">Falta Meio Turno</option>
+                        <option value="falta_dia_todo">Falta Dia Todo</option>
+                        <option value="esquecimento_ponto">Esquecimento de Ponto</option>
+                        <option value="advertencia">Advertência</option>
+                        <option value="compensacao">Compensação</option>
+                        <option value="licenca_maternidade">Licença Maternidade</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">Data:</label>
+                    <input type="date" name="eventos[0][data]" id="eventDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="eventObservation">Observação:</label>
+                    <input type="text" name="eventos[0][observacao]" id="eventObservation">
+                </div>
+                <button type="button" id="addEventBtn" class="action-btn">Adicionar Evento</button>
+                <div id="eventsList"></div>
+                <button type="submit" class="action-btn">Salvar Eventos</button>
+            </form>
+            <div id="existingEvents">
+                <h3>Eventos Existentes</h3>
+                <ul id="eventList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Modals
+            const notificationModal = document.getElementById('notificationModal');
+            const configWarningModal = document.getElementById('configWarningModal');
+            const eventModal = document.getElementById('eventModal');
+            const closeBtns = document.querySelectorAll('.close-btn');
+
+            // Abrir modals
+            if (document.querySelector('.message.warning')) {
+                configWarningModal.style.display = 'block';
+            }
+            if (funcionarios_incompletos > 0 || tentativas_maliciosas_count > 0) {
+                notificationModal.style.display = 'block';
+            }
+
+            // Fechar modals
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').style.display = 'none';
+                });
+            });
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+
+            // Event Modal
+            function openEventModal(funcionarioId, trimestre) {
+                document.getElementById('eventFuncionarioId').value = funcionarioId;
+                document.getElementById('eventTrimestre').value = trimestre;
+                eventModal.style.display = 'block';
+                fetch(`/participacao/listar_eventos/${funcionarioId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const eventList = document.getElementById('eventList');
+                        eventList.innerHTML = '';
+                        data.eventos.forEach(event => {
+                            const li = document.createElement('li');
+                            li.innerHTML = `${event.tipo} - ${event.data} <input type="checkbox" name="excluir_eventos[]" value="${event.id}"> Excluir`;
+                            eventList.appendChild(li);
+                        });
+                    });
+            }
+
+            // Adicionar novo evento
+            let eventIndex = 0;
+            document.getElementById('addEventBtn').addEventListener('click', function() {
+                eventIndex++;
+                const eventsList = document.getElementById('eventsList');
+                const newEvent = `
+                    <div class="form-group">
+                        <label>Tipo de Evento:</label>
+                        <select name="eventos[${eventIndex}][tipo]">
+                            <option value="atraso">Atraso</option>
+                            <option value="saida_antecipada">Saída Antecipada</option>
+                            <option value="atestado">Atestado</option>
+                            <option value="falta_justificada">Falta Justificada</option>
+                            <option value="falta_nao_justificada">Falta Não Justificada</option>
+                            <option value="falta_meio_turno">Falta Meio Turno</option>
+                            <option value="falta_dia_todo">Falta Dia Todo</option>
+                            <option value="esquecimento_ponto">Esquecimento de Ponto</option>
+                            <option value="advertencia">Advertência</option>
+                            <option value="compensacao">Compensação</option>
+                            <option value="licenca_maternidade">Licença Maternidade</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data:</label>
+                        <input type="date" name="eventos[${eventIndex}][data]" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Observação:</label>
+                        <input type="text" name="eventos[${eventIndex}][observacao]">
+                    </div>
+                `;
+                eventsList.innerHTML += newEvent;
+            });
+        });
+    </script>
+
+    <style>
+        /* Reutilizando estilos de participacao.html */
+        .topbar {
+            background-color: #D1D2D4;
+            color: #FFFFFF;
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .topbar h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            color: #3D4145;
+            flex-grow: 1;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        .logout-btn, .back-btn, .action-btn {
+            background-color: transparent;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .logout-btn {
+            color: #3D4145;
+            border: 1px solid #3D4145;
+        }
+        .logout-btn:hover {
+            background-color: #DD4243;
+            border-color: #DD4243;
+            color: #FFFFFF;
+        }
+        .back-btn {
+            color: #FF5555;
+            border: 1px solid #FF5555;
+        }
+        .back-btn:hover {
+            background-color: #CC4444;
+            border-color: #CC4444;
+            color: #FFFFFF;
+        }
+        .action-btn {
+            background-color: #DD4243;
+            color: #FFFFFF;
+            border: none;
+        }
+        .action-btn:hover {
+            background-color: #B83637;
+        }
+        .action-btn.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .action-btn.active {
+            background-color: #B83637;
+            color: #FFFFFF;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            margin-top: 60px;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #D1D2D4;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            color: #3D4145;
+            text-decoration: none;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #DD4243;
+            color: #FFFFFF;
+        }
+        .sidebar .submenu {
+            margin-left: 15px;
+        }
+        .sidebar .submenu a.active {
+            background-color: #DD4243;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .details-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-left: 270px;
+        }
+        .message-container {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .filter-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .filter-form, .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .totals {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .totals p {
+            margin: 5px 0;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-size: 14px;
+        }
+        .details-table th, .details-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #DD4243;
+            color: white;
+            font-weight: bold;
+        }
+        .details-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .details-table tr:hover {
+            background-color: #E6E7E8;
+        }
+        .abono-form {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+        .close-btn {
+            color: #3D4145;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: #DD4243;
+        }
+        .notification-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                top: 0;
+            }
+            .details-container {
+                margin-left: 0;
+                padding: 10px;
+            }
+            .filter-section {
+                flex-direction: column;
+            }
+            .filter-form, .action-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,415 @@
+{% load static filters %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Configurar Participação por Setor</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <!-- Topbar -->
+    <div class="topbar">
+        <h1>Configurar Participação por Setor</h1>
+        <div class="button-group">
+            <a href="{% url 'Participacao:participacao' %}" class="back-btn">Voltar</a>
+            <form method="post" action="{% url 'Participacao:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">Sair</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="container">
+        <div class="sidebar">
+            {% if user.is_authenticated %}
+                {% if user.is_superuser or user.funcionario.tipo_acesso == 'gestor' %}
+                    <a href="{% url 'Participacao:participacao' %}">Painel do Administrador</a>
+                    <div class="submenu">
+                        <a href="{% url 'Participacao:participacao' %}" {% if request.resolver_match.url_name == 'participacao' %}class="active"{% endif %}>Participação</a>
+                        <a href="{% url 'Participacao:configurar_participacao_setor' %}" {% if request.resolver_match.url_name == 'configurar_participacao_setor' %}class="active"{% endif %}>Configurar Base por Setor</a>
+                        <a href="{% url 'Participacao:recalcular_participacao' %}" {% if request.resolver_match.url_name == 'recalcular_participacao' %}class="active"{% endif %}>Calcular Participação</a>
+                        {% if user.is_superuser or user.funcionario.pode_configurar_regras %}
+                            <a href="{% url 'Participacao:configurar_regras_participacao' %}" {% if request.resolver_match.url_name == 'configurar_regras_participacao' %}class="active"{% endif %}>Configurar Regras de Participação</a>
+                        {% endif %}
+                    </div>
+                    <a href="#">Funcionários/Setores</a>
+                    <div class="submenu">
+                        <a href="{% url 'Participacao:cadastrar_setor' %}" {% if request.resolver_match.url_name == 'cadastrar_setor' %}class="active"{% endif %}>Cadastrar Setor</a>
+                        <a href="{% url 'Participacao:cadastrar_funcionario' %}" {% if request.resolver_match.url_name == 'cadastrar_funcionario' %}class="active"{% endif %}>Cadastrar Funcionário</a>
+                        <a href="{% url 'Participacao:funcionarios' %}" {% if request.resolver_match.url_name == 'funcionarios' %}class="active"{% endif %}>Configurar Funcionários</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="details-container">
+            {% if messages %}
+                <div class="message-container">
+                    {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                            <div class="message success">{{ message }}</div>
+                        {% elif message.tags == 'error' %}
+                            <div class="message error">{{ message }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <h2>Lista de Configurações</h2>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>Trimestre</th>
+                        <th>Documentos Normais</th>
+                        <th>Documentos Diferenciados</th>
+                        <th>Dedução Normal</th>
+                        <th>Dedução Diferenciada</th>
+                        <th>% Normal</th>
+                        <th>% Diferenciada</th>
+                        <th>% Faturamento</th>
+                        <th>% Demais</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for valor in valores_existentes %}
+                    <tr>
+                        <td>{{ valor.trimestre }}</td>
+                        <td>{{ valor.documentos_normais }}</td>
+                        <td>{{ valor.documentos_diferenciados }}</td>
+                        <td>{{ valor.deducao_normal }}</td>
+                        <td>{{ valor.deducao_diferenciada }}</td>
+                        <td>{{ valor.percentual_normal }}%</td>
+                        <td>{{ valor.percentual_diferenciada }}%</td>
+                        <td>{{ valor.percentual_faturamento }}%</td>
+                        <td>{{ valor.percentual_demais }}%</td>
+                        <td>
+                            <form method="post" action="{% url 'Participacao:configurar_participacao_setor' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="trimestre" value="{{ valor.trimestre }}">
+                                <button type="submit" class="action-btn">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10">Nenhuma configuração cadastrada.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h2>Adicionar Nova Configuração</h2>
+            <form method="post" class="form-container">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="trimestre">Trimestre:</label>
+                    <select name="trimestre" id="trimestre" required>
+                        {% for t in trimestres %}
+                        <option value="{{ t }}">{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="documentos_normais">Documentos Normais:</label>
+                    <input type="number" name="documentos_normais" id="documentos_normais" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="documentos_diferenciados">Documentos Diferenciados:</label>
+                    <input type="number" name="documentos_diferenciados" id="documentos_diferenciados" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="deducao_normal">Dedução Normal:</label>
+                    <input type="number" name="deducao_normal" id="deducao_normal" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="deducao_diferenciada">Dedução Diferenciada:</label>
+                    <input type="number" name="deducao_diferenciada" id="deducao_diferenciada" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="percentual_normal">Percentual Normal (%):</label>
+                    <input type="number" name="percentual_normal" id="percentual_normal" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="percentual_diferenciada">Percentual Diferenciada (%):</label>
+                    <input type="number" name="percentual_diferenciada" id="percentual_diferenciada" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="percentual_faturamento">Percentual Faturamento (%):</label>
+                    <input type="number" name="percentual_faturamento" id="percentual_faturamento" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="percentual_demais">Percentual Demais (%):</label>
+                    <input type="number" name="percentual_demais" id="percentual_demais" step="0.01" min="0" required>
+                </div>
+                <button type="submit" name="action" value="create" class="action-btn">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Notificações -->
+    <div id="notificationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">×</span>
+            <h2>Notificações</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'warning' %}
+                        <div class="notification-item">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>Nenhuma notificação no momento.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('notificationModal');
+            const closeBtn = document.querySelector('.close-btn');
+
+            if (document.querySelector('.message.warning')) {
+                modal.style.display = 'block';
+            }
+
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
+    <style>
+        /* Reutilizando estilos de participacao.html */
+        .topbar {
+            background-color: #D1D2D4;
+            color: #FFFFFF;
+            padding: 15px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .topbar h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            color: #3D4145;
+            flex-grow: 1;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        .logout-btn, .back-btn, .action-btn {
+            background-color: transparent;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .logout-btn {
+            color: #3D4145;
+            border: 1px solid #3D4145;
+        }
+        .logout-btn:hover {
+            background-color: #DD4243;
+            border-color: #DD4243;
+            color: #FFFFFF;
+        }
+        .back-btn {
+            color: #FF5555;
+            border: 1px solid #FF5555;
+        }
+        .back-btn:hover {
+            background-color: #CC4444;
+            border-color: #CC4444;
+            color: #FFFFFF;
+        }
+        .action-btn {
+            background-color: #DD4243;
+            color: #FFFFFF;
+            border: none;
+        }
+        .action-btn:hover {
+            background-color: #B83637;
+        }
+        .container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            margin-top: 60px;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #D1D2D4;
+            padding: 20px;
+            height: 100vh;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .sidebar a {
+            display: block;
+            padding: 10px;
+            color: #3D4145;
+            text-decoration: none;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .sidebar a:hover {
+            background-color: #DD4243;
+            color: #FFFFFF;
+        }
+        .sidebar .submenu {
+            margin-left: 15px;
+        }
+        .sidebar .submenu a.active {
+            background-color: #DD4243;
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+        .details-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-left: 270px;
+        }
+        .message-container {
+            margin-bottom: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0 auto;
+            font-size: 14px;
+        }
+        .details-table th, .details-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #DD4243;
+            color: white;
+            font-weight: bold;
+        }
+        .details-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .details-table tr:hover {
+            background-color: #E6E7E8;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
+            margin: 20px 0;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+        .close-btn {
+            color: #3D4145;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-btn:hover {
+            color: #DD4243;
+        }
+        .notification-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                top: 0;
+            }
+            .details-container {
+                margin-left: 0;
+                padding: 10px;
+            }
+        }
+    </style>
+</body>
+</html>
