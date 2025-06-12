@@ -1,0 +1,427 @@
+Subject: [PATCH] Versão inicial do Projeto Portal V2 com módulo de participação
+---
+Index: requirements.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/requirements.txt b/requirements.txt
+--- a/requirements.txt	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/requirements.txt	(date 1749680484513)
+@@ -1,0 +1,13 @@
++Django~=5.2
++pandas~=2.2.3
++openpyxl~=3.1.5
++reportlab~=4.4.1
++pip~=24.3.1
++pillow~=11.2.1
++Jinja2~=3.1.6
++asgiref~=3.8.1
++sqlparse~=0.5.3
++psycopg~=3.2.9
++psycopg2~=2.9.10
++colorama~=0.4.6
++numpy~=2.2.4
+\ No newline at end of file
+Index: Projeto_Portal_v2/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Projeto_Portal_v2/urls.py b/Projeto_Portal_v2/urls.py
+--- a/Projeto_Portal_v2/urls.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/Projeto_Portal_v2/urls.py	(date 1749690577860)
+@@ -1,7 +1,12 @@
+ from django.contrib import admin
+ from django.urls import path, include
++from django.shortcuts import redirect
++
++def redirect_to_login(request):
++    return redirect('Participacao:login')  # Redireciona para a URL de login do app participacao
+ 
+ urlpatterns = [
++    path('', redirect_to_login),  # Rota para a URL raiz
+     path('admin/', admin.site.urls),
+     path('participacao/', include('apps.participacao.urls', namespace='Participacao')),
+ ]
+\ No newline at end of file
+Index: Projeto_Portal_v2/wsgi.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Projeto_Portal_v2/wsgi.py b/Projeto_Portal_v2/wsgi.py
+--- a/Projeto_Portal_v2/wsgi.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/Projeto_Portal_v2/wsgi.py	(date 1749690185060)
+@@ -1,0 +1,3 @@
++from django.core.wsgi import get_wsgi_application
++
++application = get_wsgi_application()
+\ No newline at end of file
+Index: Projeto_Portal_v2/settings.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Projeto_Portal_v2/settings.py b/Projeto_Portal_v2/settings.py
+--- a/Projeto_Portal_v2/settings.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/Projeto_Portal_v2/settings.py	(date 1749689885527)
+@@ -74,7 +74,7 @@
+     'default': {
+         'ENGINE': 'django.db.backends.postgresql',
+         'NAME': 'portal_sana',
+-        'USER': 'admin',
++        'USER': 'postgres',
+         'PASSWORD': 'admin123',
+         'HOST': 'localhost',
+         'PORT': '5432',
+Index: apps/participacao/admin.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/admin.py b/apps/participacao/admin.py
+--- a/apps/participacao/admin.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/apps/participacao/admin.py	(date 1749693285945)
+@@ -1,0 +1,5 @@
++from django.contrib import admin
++from .models import Funcionario, RegraParticipacao
++
++admin.site.register(Funcionario)
++admin.site.register(RegraParticipacao)
+\ No newline at end of file
+Index: apps/participacao/forms.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/forms.py b/apps/participacao/forms.py
+new file mode 100644
+--- /dev/null	(date 1749686636087)
++++ b/apps/participacao/forms.py	(date 1749686636087)
+@@ -0,0 +1,8 @@
++# apps/participacao/forms.py
++from django import forms
++from ..models import Setor
++
++class SetorForm(forms.ModelForm):
++    class Meta:
++        model = Setor
++        fields = ['nome', 'recebe_participacao']
+\ No newline at end of file
+Index: apps/participacao/views/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/views/__init__.py b/apps/participacao/views/__init__.py
+--- a/apps/participacao/views/__init__.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/apps/participacao/views/__init__.py	(date 1749684315240)
+@@ -1,19 +1,52 @@
+-# Importa funções de diferentes arquivos dentro de views/
++# apps/participacao/views/__init__.py
+ from .auth import login, logout_view
+-from .views import index, participacao, configurar_participacao_setor, configurar_regras_participacao
+-from .views import configurar_setores_participacao, cadastrar_setor, cadastrar_funcionario
+-from .views import funcionarios, editar_funcionario, alternar_abono, recalcular_participacao
+-from .reports import detalhes_calculo_participacao, gerar_relatorio_pdf, gerar_relatorio_excel
+-from .reports import download_extrato_pdf, download_relatorio_pagamento
+-from .views import inserir_eventos, listar_eventos, editar_dias_trabalhados
+-from .views import importar_planilha_participacao
++from .reports import (
++    detalhes_calculo_participacao,
++    gerar_relatorio_pdf,
++    gerar_relatorio_excel,
++    download_extrato_pdf,
++    download_relatorio_pagamento
++)
++from .participation import (
++    index,
++    participacao,
++    editar_dias_trabalhados,
++    recalcular_participacao,
++    configurar_participacao_setor,
++    configurar_regras_participacao,
++    configurar_setores_participacao,
++    cadastrar_setor,
++    cadastrar_funcionario,
++    funcionarios,
++    editar_funcionario,
++    alternar_abono,
++    inserir_eventos,
++    listar_eventos,
++    importar_planilha_participacao,
++    configurar_proporcional,
++    configurar_ajustes_participacao,
++    calcular_participacao,
++    revogar_aprovacao_participacao,
++    recalcular_funcionario,
++    adicionar_advertencia,
++    aprovar_participacao,
++    extrato,
++    download_extrato_pdf,
++    logs_geral,
++    logs,
++    configurar_abono_funcionario
++)
+ 
+-# Define explicitamente quais funções estão disponíveis para importação
+ __all__ = [
+-    'login', 'logout_view', 'index', 'participacao', 'configurar_participacao_setor',
+-    'configurar_regras_participacao', 'configurar_setores_participacao', 'cadastrar_setor',
+-    'cadastrar_funcionario', 'funcionarios', 'editar_funcionario', 'alternar_abono',
+-    'recalcular_participacao', 'detalhes_calculo_participacao', 'gerar_relatorio_pdf',
++    'login', 'logout_view',
++    'index', 'participacao', 'editar_dias_trabalhados', 'recalcular_participacao',
++    'configurar_participacao_setor', 'configurar_regras_participacao',
++    'configurar_setores_participacao', 'cadastrar_setor', 'cadastrar_funcionario',
++    'funcionarios', 'editar_funcionario', 'alternar_abono', 'inserir_eventos',
++    'listar_eventos', 'importar_planilha_participacao', 'configurar_proporcional',
++    'configurar_ajustes_participacao', 'calcular_participacao',
++    'revogar_aprovacao_participacao', 'recalcular_funcionario', 'adicionar_advertencia',
++    'aprovar_participacao', 'detalhes_calculo_participacao', 'gerar_relatorio_pdf',
+     'gerar_relatorio_excel', 'download_extrato_pdf', 'download_relatorio_pagamento',
+-    'inserir_eventos', 'listar_eventos', 'editar_dias_trabalhados', 'importar_planilha_participacao'
++    'extrato', 'logs_geral', 'logs', 'configurar_abono_funcionario'
+ ]
+\ No newline at end of file
+Index: apps/participacao/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/__init__.py b/apps/participacao/__init__.py
+--- a/apps/participacao/__init__.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/apps/participacao/__init__.py	(date 1749682188019)
+@@ -1,3 +1,7 @@
+ # apps/participacao/__init__.py
+-# Deixe vazio ou apenas defina __all__ sem imports diretos
+-__all__ = ['Setor', 'Funcionario', 'LoginAttempt', 'UserActionLog', 'RegraParticipacao', 'ValoresParticipacao']
+\ No newline at end of file
++# Configuração mínima do app
++from django.apps import AppConfig
++
++class ParticipacaoConfig(AppConfig):
++    default_auto_field = 'django.db.models.BigAutoField'
++    name = 'apps.participacao'
+\ No newline at end of file
+Index: apps/participacao/models/funcionario.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/models/funcionario.py b/apps/participacao/models/funcionario.py
+--- a/apps/participacao/models/funcionario.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/apps/participacao/models/funcionario.py	(date 1749682584100)
+@@ -23,29 +23,14 @@
+     setor = models.ForeignKey(Setor, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Setor")
+     data_admissao = models.DateField(null=True, blank=True, verbose_name="Data de Admissão")
+     data_demissao = models.DateField(null=True, blank=True, verbose_name="Data de Demissão")
+-    tipo_acesso = models.CharField(
+-        max_length=20,
+-        choices=[('gestor', 'Gestor'), ('master_admin', 'Master Admin')],
+-        default='gestor',
+-        verbose_name="Tipo de Acesso"
+-    )
+-    tipo_participacao = models.CharField(
+-        max_length=20,
+-        choices=[('normal', 'Normal'), ('proporcional', 'Proporcional'), ('menor_aprendiz', 'Menor Aprendiz')],
+-        default='normal',
+-        verbose_name="Tipo de Participação"
+-    )
++    tipo_acesso = models.CharField(max_length=20, choices=[('gestor', 'Gestor'), ('master_admin', 'Master Admin')], default='gestor', verbose_name="Tipo de Acesso")
++    tipo_participacao = models.CharField(max_length=20, choices=[('normal', 'Normal'), ('proporcional', 'Proporcional'), ('menor_aprendiz', 'Menor Aprendiz')], default='normal', verbose_name="Tipo de Participação")
+     percentual_participacao = models.DecimalField(max_digits=5, decimal_places=2, default=100.00, verbose_name="Percentual de Participação (%)")
+     proporcional = models.IntegerField(default=0, verbose_name="Dias Proporcionais")
+     trimestre_inicio_participacao = models.CharField(max_length=10, null=True, blank=True, verbose_name="Trimestre de Início")
+     abono_ativo = models.BooleanField(default=False, verbose_name="Abono Ativo")
+     abono_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor do Abono")
+-    abono_type = models.CharField(
+-        max_length=10,
+-        choices=[('fixed', 'Fixo'), ('percentage', 'Percentual')],
+-        default='fixed',
+-        verbose_name="Tipo de Abono"
+-    )
++    abono_type = models.CharField(max_length=10, choices=[('fixed', 'Fixo'), ('percentage', 'Percentual')], default='fixed', verbose_name="Tipo de Abono")
+ 
+     def __str__(self):
+         return self.nome
+@@ -79,4 +64,44 @@
+ 
+     class Meta:
+         verbose_name = "Log de Ação do Usuário"
+-        verbose_name_plural = "Logs de Ações do Usuário"
+\ No newline at end of file
++        verbose_name_plural = "Logs de Ações do Usuário"
++
++class Participacao(models.Model):
++    funcionario = models.ForeignKey(Funcionario, on_delete=models.CASCADE, verbose_name="Funcionário")
++    trimestre = models.CharField(max_length=10, verbose_name="Trimestre")
++    dias_trabalhados = models.IntegerField(default=0, verbose_name="Dias Trabalhados")
++    valor_bruto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor Bruto")
++    final_participacao = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Valor Final")
++
++    def __str__(self):
++        return f"Participação de {self.funcionario.nome} - {self.trimestre}"
++
++    class Meta:
++        verbose_name = "Participação"
++        verbose_name_plural = "Participações"
++
++class AprovacaoSetor(models.Model):
++    setor = models.ForeignKey(Setor, on_delete=models.CASCADE, verbose_name="Setor")
++    trimestre = models.CharField(max_length=10, verbose_name="Trimestre")
++    status = models.CharField(max_length=20, choices=[('pendente', 'Pendente'), ('aprovado', 'Aprovado'), ('pago', 'Pago')], default='pendente', verbose_name="Status")
++
++    def __str__(self):
++        return f"Aprovação de {self.setor.nome} - {self.trimestre}"
++
++    class Meta:
++        verbose_name = "Aprovação de Setor"
++        verbose_name_plural = "Aprovações de Setores"
++
++# Novo modelo Evento
++class Evento(models.Model):
++    funcionario = models.ForeignKey(Funcionario, on_delete=models.CASCADE, verbose_name="Funcionário")
++    data = models.DateField(verbose_name="Data do Evento")
++    tipo = models.CharField(max_length=50, verbose_name="Tipo de Evento")
++    descricao = models.TextField(verbose_name="Descrição", blank=True)
++
++    def __str__(self):
++        return f"Evento de {self.funcionario.nome} - {self.data}"
++
++    class Meta:
++        verbose_name = "Evento"
++        verbose_name_plural = "Eventos"
+\ No newline at end of file
+Index: apps/participacao/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/urls.py b/apps/participacao/urls.py
+--- a/apps/participacao/urls.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/apps/participacao/urls.py	(date 1749684326649)
+@@ -1,8 +1,12 @@
++# apps/participacao/urls.py
+ from django.urls import path
+-from .views.auth import login, logout_view
+-from .views.main_views import (  # Substitua 'main_views' por 'views' se não renomear
++from .views import (
++    login,
++    logout_view,
+     index,
+     participacao,
++    editar_dias_trabalhados,
++    recalcular_participacao,
+     configurar_participacao_setor,
+     configurar_regras_participacao,
+     configurar_setores_participacao,
+@@ -11,56 +15,61 @@
+     funcionarios,
+     editar_funcionario,
+     alternar_abono,
+-    recalcular_participacao,
+     inserir_eventos,
+     listar_eventos,
+-    editar_dias_trabalhados,
+-    importar_planilha_participacao
+-)
+-from .views.reports import (
++    importar_planilha_participacao,
++    configurar_proporcional,
++    configurar_ajustes_participacao,
++    calcular_participacao,
++    revogar_aprovacao_participacao,
++    recalcular_funcionario,
++    adicionar_advertencia,
++    aprovar_participacao,
+     detalhes_calculo_participacao,
+     gerar_relatorio_pdf,
+     gerar_relatorio_excel,
+     download_extrato_pdf,
+-    download_relatorio_pagamento
++    download_relatorio_pagamento,
++    extrato,
++    logs_geral,
++    logs,
++    configurar_abono_funcionario
+ )
+ 
+ app_name = 'Participacao'
+ 
+ urlpatterns = [
+-    # Autenticação
+     path('login/', login, name='login'),
+     path('logout/', logout_view, name='logout'),
+-
+-    # Painel Principal
+     path('', index, name='index'),
+     path('participacao/', participacao, name='participacao'),
+-
+-    # Configurações
++    path('editar_dias_trabalhados/<int:participacao_id>/', editar_dias_trabalhados, name='editar_dias_trabalhados'),
++    path('recalcular_participacao/', recalcular_participacao, name='recalcular_participacao'),
+     path('configurar_participacao_setor/', configurar_participacao_setor, name='configurar_participacao_setor'),
+     path('configurar_regras_participacao/', configurar_regras_participacao, name='configurar_regras_participacao'),
+     path('configurar_setores_participacao/', configurar_setores_participacao, name='configurar_setores_participacao'),
+-
+-    # Funcionários e Setores
+     path('cadastrar_setor/', cadastrar_setor, name='cadastrar_setor'),
+     path('cadastrar_funcionario/', cadastrar_funcionario, name='cadastrar_funcionario'),
+     path('funcionarios/', funcionarios, name='funcionarios'),
+-    path('editar_funcionario/<int:pk>/', editar_funcionario, name='editar_funcionario'),
++    path('editar_funcionario/<int:funcionario_id>/', editar_funcionario, name='editar_funcionario'),
+     path('alternar_abono/', alternar_abono, name='alternar_abono'),
+-
+-    # Participação
+-    path('recalcular_participacao/', recalcular_participacao, name='recalcular_participacao'),
+-    path('detalhes_calculo_participacao/', detalhes_calculo_participacao, name='detalhes_calculo_participacao'),
+-    path('extrato/<str:funcionario_nome>/', download_extrato_pdf, name='extrato'),
+     path('inserir_eventos/', inserir_eventos, name='inserir_eventos'),
+     path('listar_eventos/<int:funcionario_id>/', listar_eventos, name='listar_eventos'),
+-    path('editar_dias_trabalhados/<int:pk>/', editar_dias_trabalhados, name='editar_dias_trabalhados'),
+-
+-    # Importação
+     path('importar_planilha_participacao/', importar_planilha_participacao, name='importar_planilha_participacao'),
+-
+-    # Relatórios
++    path('configurar_proporcional/', configurar_proporcional, name='configurar_proporcional'),
++    path('configurar_ajustes_participacao/', configurar_ajustes_participacao, name='configurar_ajustes_participacao'),
++    path('calcular_participacao/', calcular_participacao, name='calcular_participacao'),
++    path('revogar_aprovacao_participacao/', revogar_aprovacao_participacao, name='revogar_aprovacao_participacao'),
++    path('recalcular_funcionario/<int:funcionario_id>/', recalcular_funcionario, name='recalcular_funcionario'),
++    path('adicionar_advertencia/', adicionar_advertencia, name='adicionar_advertencia'),
++    path('aprovar_participacao/', aprovar_participacao, name='aprovar_participacao'),
++    path('detalhes_calculo_participacao/', detalhes_calculo_participacao, name='detalhes_calculo_participacao'),
+     path('gerar_relatorio_pdf/', gerar_relatorio_pdf, name='gerar_relatorio_pdf'),
+     path('gerar_relatorio_excel/', gerar_relatorio_excel, name='gerar_relatorio_excel'),
++    path('download_extrato_pdf/<str:funcionario_nome>/', download_extrato_pdf, name='download_extrato_pdf'),
+     path('download_relatorio_pagamento/', download_relatorio_pagamento, name='download_relatorio_pagamento'),
++    path('extrato/<str:funcionario>/', extrato, name='extrato'),
++    path('logs_geral/', logs_geral, name='logs_geral'),
++    path('logs/<int:funcionario_id>/', logs, name='logs'),
++    path('configurar_abono_funcionario/', configurar_abono_funcionario, name='configurar_abono_funcionario'),
+ ]
+\ No newline at end of file
+Index: apps/participacao/models/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/apps/participacao/models/__init__.py b/apps/participacao/models/__init__.py
+--- a/apps/participacao/models/__init__.py	(revision 18d679fcf824944ee215833e58fa4ac4edb79f94)
++++ b/apps/participacao/models/__init__.py	(date 1749685656532)
+@@ -1,5 +1,8 @@
+ # apps/participacao/models/__init__.py
+-from .funcionario import Setor, Funcionario, LoginAttempt, UserActionLog
++from .funcionario import Setor, Funcionario, LoginAttempt, UserActionLog, Participacao, AprovacaoSetor, Evento
+ from .regra_participacao import RegraParticipacao, ValoresParticipacao
+ 
+-__all__ = ['Setor', 'Funcionario', 'LoginAttempt', 'UserActionLog', 'RegraParticipacao', 'ValoresParticipacao']
+\ No newline at end of file
++__all__ = [
++    'Setor', 'Funcionario', 'LoginAttempt', 'UserActionLog', 'Participacao',
++    'AprovacaoSetor', 'RegraParticipacao', 'ValoresParticipacao', 'Evento'
++]
+\ No newline at end of file

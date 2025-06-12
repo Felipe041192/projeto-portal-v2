@@ -1,0 +1,340 @@
+2025-06-11 20:43:01,784 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 20:43:19,882 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 20:47:36,886 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\models\__init__.py changed, reloading.
+2025-06-11 20:48:12,593 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 20:52:10,988 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 20:56:13,545 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 20:59:31,514 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 21:01:32,305 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 21:03:22,589 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 21:29:36,349 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 21:34:37,053 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py changed, reloading.
+2025-06-11 21:48:27,198 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\Projeto_Portal_v2\settings.py changed, reloading.
+2025-06-11 21:58:06,036 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\Projeto_Portal_v2\settings.py changed, reloading.
+2025-06-11 22:03:05,629 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\Projeto_Portal_v2\wsgi.py changed, reloading.
+2025-06-11 22:03:21,370 [WARNING] Not Found: /
+2025-06-11 22:03:21,692 [WARNING] Not Found: /favicon.ico
+2025-06-11 22:03:38,710 [WARNING] Not Found: /
+2025-06-11 22:07:03,856 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\Projeto_Portal_v2\urls.py changed, reloading.
+2025-06-11 22:08:47,723 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\Projeto_Portal_v2\urls.py changed, reloading.
+2025-06-11 22:09:38,131 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\Projeto_Portal_v2\urls.py changed, reloading.
+2025-06-11 22:13:11,978 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:13:13,399 [INFO] Usuário admin acessando página inicial
+2025-06-11 22:13:13,723 [ERROR] Internal Server Error: /participacao/
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py", line 80, in index
+    setores = Setor.objects.annotate(total_funcionarios=Count('funcionarios')).order_by('nome')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1635, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1687, in _annotate
+    clone.query.add_annotation(
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 181, in resolve_expression
+    result = super().resolve_expression(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 63, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 2046, in resolve_ref
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1897, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1802, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'funcionarios' into field. Choices are: aprovacaosetor, ativo, funcionario, id, nome, recebe_participacao, valor_base
+2025-06-11 22:22:42,626 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:22:44,382 [WARNING] Falha na tentativa de login: username=admin, IP=127.0.0.1
+2025-06-11 22:22:52,312 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:22:54,036 [INFO] Usuário admin acessando página inicial
+2025-06-11 22:22:54,091 [ERROR] Internal Server Error: /participacao/
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py", line 80, in index
+    setores = Setor.objects.annotate(total_funcionarios=Count('funcionarios')).order_by('nome')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1635, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1687, in _annotate
+    clone.query.add_annotation(
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 181, in resolve_expression
+    result = super().resolve_expression(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 63, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 2046, in resolve_ref
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1897, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1802, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'funcionarios' into field. Choices are: aprovacaosetor, ativo, funcionario, id, nome, recebe_participacao, valor_base
+2025-06-11 22:27:32,965 [DEBUG] Processando requisição para /participacao/participacao/ - Usuário autenticado: True
+2025-06-11 22:27:33,099 [ERROR] Internal Server Error: /participacao/participacao/
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 513, in __get__
+    rel_obj = self.related.get_cached_value(instance)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'funcionario'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedTable: ERRO:  relação "participacao_funcionario" não existe
+LINE 1: ...or", "participacao_funcionario"."abono_type" FROM "participa...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\decorators.py", line 15, in wrapper
+    funcionario = request.user.funcionario
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\utils\functional.py", line 253, in inner
+    return func(_wrapped, *args)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 520, in __get__
+    rel_obj = self.get_queryset(instance=instance).get(**filter_args)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 629, in get
+    num = len(clone)
+          ^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 366, in __len__
+    self._fetch_all()
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1935, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\compiler.py", line 1622, in execute_sql
+    cursor.execute(sql, params)
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: ERRO:  relação "participacao_funcionario" não existe
+LINE 1: ...or", "participacao_funcionario"."abono_type" FROM "participa...
+                                                             ^
+
+2025-06-11 22:33:38,548 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:33:40,656 [INFO] Usuário admin acessando página inicial
+2025-06-11 22:33:40,725 [ERROR] Internal Server Error: /participacao/
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py", line 80, in index
+    setores = Setor.objects.annotate(total_funcionarios=Count('funcionarios')).order_by('nome')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1635, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1687, in _annotate
+    clone.query.add_annotation(
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 181, in resolve_expression
+    result = super().resolve_expression(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 63, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 2046, in resolve_ref
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1897, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1802, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'funcionarios' into field. Choices are: aprovacaosetor, ativo, funcionario, id, nome, recebe_participacao, valor_base
+2025-06-11 22:33:58,299 [WARNING] Not Found: /favicon.ico
+2025-06-11 22:54:46,210 [INFO] C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\admin.py changed, reloading.
+2025-06-11 22:54:58,073 [WARNING] Not Found: /favicon.ico
+2025-06-11 22:55:02,458 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:55:04,889 [INFO] Usuário admin acessando página inicial
+2025-06-11 22:55:04,980 [ERROR] Internal Server Error: /participacao/
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py", line 80, in index
+    setores = Setor.objects.annotate(total_funcionarios=Count('funcionarios')).order_by('nome')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1635, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1687, in _annotate
+    clone.query.add_annotation(
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 181, in resolve_expression
+    result = super().resolve_expression(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 63, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 2046, in resolve_ref
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1897, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1802, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'funcionarios' into field. Choices are: aprovacaosetor, ativo, funcionario, id, nome, recebe_participacao, valor_base
+2025-06-11 22:57:02,351 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:57:03,598 [WARNING] Falha na tentativa de login: username=admin, IP=127.0.0.1
+2025-06-11 22:57:09,028 [ERROR] Erro ao registrar tentativa de login: name 'User' is not defined
+2025-06-11 22:57:10,269 [WARNING] Falha na tentativa de login: username=admin, IP=127.0.0.1
+2025-06-11 22:57:55,357 [INFO] Usuário admin acessando página inicial
+2025-06-11 22:57:55,448 [ERROR] Internal Server Error: /participacao/
+Traceback (most recent call last):
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\OneDrive\Desktop\projeto-portal-v2\apps\participacao\views\participation.py", line 80, in index
+    setores = Setor.objects.annotate(total_funcionarios=Count('funcionarios')).order_by('nome')
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1635, in annotate
+    return self._annotate(args, kwargs, select=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\query.py", line 1687, in _annotate
+    clone.query.add_annotation(
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1218, in add_annotation
+    annotation = annotation.resolve_expression(self, allow_joins=True, reuse=None)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 181, in resolve_expression
+    result = super().resolve_expression(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\aggregates.py", line 63, in resolve_expression
+    c = super().resolve_expression(query, allow_joins, reuse, summarize)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 300, in resolve_expression
+    expr.resolve_expression(query, allow_joins, reuse, summarize)
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\expressions.py", line 902, in resolve_expression
+    return query.resolve_ref(self.name, allow_joins, reuse, summarize)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 2046, in resolve_ref
+    join_info = self.setup_joins(
+                ^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1897, in setup_joins
+    path, final_field, targets, rest = self.names_to_path(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\caval\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\db\models\sql\query.py", line 1802, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'funcionarios' into field. Choices are: aprovacaosetor, ativo, funcionario, id, nome, recebe_participacao, valor_base
