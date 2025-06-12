@@ -1,3 +1,7 @@
 # apps/participacao/__init__.py
-# Deixe vazio ou apenas defina __all__ sem imports diretos
-__all__ = ['Setor', 'Funcionario', 'LoginAttempt', 'UserActionLog', 'RegraParticipacao', 'ValoresParticipacao']
+# Configuração mínima do app
+from django.apps import AppConfig
+
+class ParticipacaoConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.participacao'

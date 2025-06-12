@@ -74,7 +74,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'portal_sana',
-        'USER': 'admin',
+        'USER': 'postgres',
         'PASSWORD': 'admin123',
         'HOST': 'localhost',
         'PORT': '5432',
